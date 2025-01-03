@@ -23,9 +23,17 @@ if file_list:
     teachers = df['教师'].unique()
     classes = df['班级'].unique()
 
-    # 选择教师和班级
+    # 选择教师
     selected_teacher = st.selectbox("选择教师:", ["全部"] + list(teachers))
-    selected_class = st.selectbox("选择班级:", ["全部"] + list(classes))
+
+    # 根据选择的教师过滤班级
+    if selected_teacher != "全部":
+        filtered_classes = df[df['教师'] == selected_teacher]['班级'].unique()
+    else:
+        filtered_classes = classes
+
+    # 选择班级
+    selected_class = st.selectbox("选择班级:", ["全部"] + list(filtered_classes))
 
     # 根据选择的教师和班级进行过滤
     if selected_teacher != "全部":
@@ -50,7 +58,10 @@ if file_list:
         result['学生'] = result['答案'].apply(lambda x: ', '.join(df[df[answer_col] == x]['姓氏'] + df[df[answer_col] == x]['名']))
 
         standard_answer_col = f'标准答案{i}'  # 动态生成标准答案列名
-        standard_answer = df[standard_answer_col][1]
+        
+        # 使用 .iloc 来避免索引问题
+        standard_answer = df[standard_answer_col].iloc[0]  # 获取标准答案，取第一行
+
         correct_count = (df[answer_col] == standard_answer).sum()  # 统计正确答案数量
         total_count = df[answer_col].notna().sum() - df[answer_col].isin(["-", "- -"]).sum()  # 计算有效答题人数
         accuracy = (correct_count / total_count * 100) if total_count > 0 else 0
@@ -58,7 +69,7 @@ if file_list:
         # 计算答题人数（所有答案不为“–”的人数）
         answering_count = df[answer_col].notna().sum() - df[answer_col].isin(["-", "- -"]).sum()
 
-        question_content = df[f'试题{i}'][1]
+        question_content = df[f'试题{i}'].iloc[0]  # 获取题目内容，取第一行
 
         results.append({
             '题号': i,
