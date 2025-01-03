@@ -7,7 +7,7 @@ from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
 
 # 设置页面标题
-st.title("通识教学部专升本作业/考试分析")
+st.title("通识教学部专升本作业/考试分析2")
 
 # 自动读取当前目录下所有的xlsx文件
 file_list = [f for f in os.listdir() if f.endswith('.xlsx')]
