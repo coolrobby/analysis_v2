@@ -6,6 +6,9 @@ from io import BytesIO
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
 import zipfile
+import tempfile
+from PIL import Image
+import imgkit
 
 # 设置页面标题
 st.title("通识教学部专升本作业/考试分析")
@@ -173,17 +176,4 @@ if file_list:
 
             # 将PDF保存到BytesIO对象中
             pdf_buffer.seek(0)
-            zip_file.writestr(f"{class_name}_分析结果.pdf", pdf_buffer.read())
-
-    # 打包完毕，提供下载按钮
-    zip_buffer.seek(0)  # Reset buffer to the beginning
-
-    st.download_button(
-        label="下载所有班级分析结果（ZIP）",
-        data=zip_buffer,
-        file_name="分析结果.zip",
-        mime="application/zip"
-    )
-
-else:
-    st.error("当前目录下没有找到任何xlsx文件。")
+            zip_file.writestr(f"{c
