@@ -4,14 +4,14 @@ import altair as alt
 import os
 
 # 设置页面标题
-st.title("川哥题目分析")
+st.title("通识教学部专升本作业/考试分析")
 
 # 自动读取当前目录下所有的xlsx文件
 file_list = [f for f in os.listdir() if f.endswith('.xlsx')]
 
 if file_list:
     # 列出上传的文件供用户选择
-    selected_file = st.selectbox("请选择要统计的文件:", file_list)
+    selected_file = st.selectbox("请选择要统计的作业/考试:", file_list)
 
     # 读取选择的文件
     df = pd.read_excel(selected_file)  # 读取Excel文件
