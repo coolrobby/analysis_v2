@@ -2,6 +2,9 @@ import pandas as pd
 import streamlit as st
 import altair as alt
 import os
+from io import BytesIO
+from reportlab.lib.pagesizes import letter
+from reportlab.pdfgen import canvas
 
 # 设置页面标题
 st.title("通识教学部专升本作业/考试分析")
@@ -125,6 +128,58 @@ if file_list:
                 st.write("")  # 添加空行
 
     st.success("统计完成！")
+
+    # ---- PDF 下载功能 ----
+    
+    # 按班级进行分组，生成PDF
+    grouped_by_class = df.groupby('班级')
+
+    pdf_files = []
+
+    for class_name, class_data in grouped_by_class:
+        # 创建一个临时的 BytesIO 流
+        pdf_buffer = BytesIO()
+
+        # 创建PDF对象
+        c = canvas.Canvas(pdf_buffer, pagesize=letter)
+        c.setFont("Helvetica", 12)
+
+        c.drawString(100, 750, f"班级: {class_name}")
+        c.drawString(100, 730, f"作业/考试分析 - {selected_file}")
+        y_position = 710
+
+        for res in sorted_results:
+            c.drawString(100, y_position, f"第{res['题号']}题 - {res['试题']}")
+            c.drawString(100, y_position - 20, f"标准答案: {res['标准答案']}")
+            c.drawString(100, y_position - 40, f"答题人数: {res['答题人数']} - 正确率: {res['正确率']:.2f}%")
+            y_position -= 60
+
+            if not res['错误答案统计'].empty:
+                for _, row in res['错误答案统计'].iterrows():
+                    c.drawString(100, y_position, f"错误答案: {row['答案']} - 出现次数: {row['出现次数']}")
+                    y_position -= 20
+                    c.drawString(100, y_position, f"学生: {row['学生']}")
+                    y_position -= 40
+
+            if y_position < 100:
+                c.showPage()
+                c.setFont("Helvetica", 12)
+                y_position = 750
+
+        c.save()
+
+        # 将PDF保存到BytesIO对象中
+        pdf_buffer.seek(0)
+        pdf_files.append((class_name, pdf_buffer))
+
+    # 提供下载链接
+    for class_name, pdf_buffer in pdf_files:
+        st.download_button(
+            label=f"下载班级 {class_name} 的分析结果",
+            data=pdf_buffer,
+            file_name=f"{class_name}_分析结果.pdf",
+            mime="application/pdf"
+        )
 
 else:
     st.error("当前目录下没有找到任何xlsx文件。")
